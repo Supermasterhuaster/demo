@@ -13,13 +13,13 @@ class UserController extends Controller
      */
     public function create(Request $request)
     {
-        $validated = $request->validate([
-            'full_name' => 'required|string|max:255',
-            'role' => 'required|string|max:255',
-            'efficiency' => 'required|integer|min:0',
-        ]);
-
         try {
+            $validated = $request->validate([
+                'full_name' => 'required|string|max:255',
+                'role' => 'required|string|max:255',
+                'efficiency' => 'required|integer|min:0',
+            ]);
+
             $user = User::create($validated);
 
             return response()->json([
@@ -27,6 +27,11 @@ class UserController extends Controller
                 'result' => ['id' => $user->id],
             ], Response::HTTP_CREATED);
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'result' => ['error' => $e->errors()],
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -34,6 +39,7 @@ class UserController extends Controller
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
 
     /**
      * Retrieve user or users.
